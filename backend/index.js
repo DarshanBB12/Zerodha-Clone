@@ -62,6 +62,10 @@ mongoose.connect(uri)
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log("MongoDB Error:", err));
 
+app.get("/", (req, res) => {
+  res.send("Zerodha Backend is running successfully 🚀");
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on ${PORT}`);
 });
