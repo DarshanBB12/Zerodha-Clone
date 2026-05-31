@@ -19,10 +19,31 @@ const allowedOrigins = (process.env.CORS_ORIGINS || "http://localhost:3001,http:
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
+const localhostOriginPattern = /^http:\/\/localhost:\d+$/i;
+const renderOriginPattern = /^https:\/\/[a-z0-9-]+\.onrender\.com$/i;
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) {
+    return true;
+  }
+
+  return (
+    allowedOrigins.includes(origin)
+    || localhostOriginPattern.test(origin)
+    || renderOriginPattern.test(origin)
+  );
+};
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (isAllowedOrigin(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );

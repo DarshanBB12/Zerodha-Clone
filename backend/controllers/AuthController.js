@@ -3,10 +3,12 @@ const jwt = require("jsonwebtoken");
 
 const { UserModel } = require("../model/UserModel");
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const buildCookieOptions = (rememberMe = false) => ({
   httpOnly: true,
-  sameSite: "lax",
-  secure: false,
+  sameSite: isProduction ? "none" : "lax",
+  secure: isProduction,
   maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000,
 });
 
@@ -97,8 +99,8 @@ const login = async (req, res) => {
 const logout = async (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
-    sameSite: "lax",
-    secure: false,
+    sameSite: isProduction ? "none" : "lax",
+    secure: isProduction,
   });
 
   return res.status(200).json({ success: true, message: "Logout successful" });
