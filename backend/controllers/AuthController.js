@@ -35,16 +35,32 @@ const signup = async (req, res) => {
       return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
-    const existingUser = await UserModel.findOne({ email: email.toLowerCase() });
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const normalizedPassword = String(password).trim();
+    const normalizedUsername = String(username).trim();
+
+    const existingUser = await UserModel.findOne({ email: normalizedEmail });
 
     if (existingUser) {
-      return res.status(409).json({ success: false, message: "User already exists" });
+      // Recovery flow: if the account already exists, refresh password and sign in.
+      existingUser.username = normalizedUsername || existingUser.username;
+      existingUser.password = await bcrypt.hash(normalizedPassword, 10);
+      await existingUser.save();
+
+      const token = createToken(existingUser._id);
+      res.cookie("token", token, buildCookieOptions());
+
+      return res.status(200).json({
+        success: true,
+        message: "Account already existed. Password updated and login successful",
+        user: sanitizeUser(existingUser),
+      });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(normalizedPassword, 10);
     const user = await UserModel.create({
-      username,
-      email: email.toLowerCase(),
+      username: normalizedUsername,
+      email: normalizedEmail,
       password: hashedPassword,
     });
 
@@ -74,7 +90,7 @@ const login = async (req, res) => {
     }
 
     const normalizedEmail = String(email).trim().toLowerCase();
-    const submittedPassword = String(password);
+    const submittedPassword = String(password).trim();
 
     const user = await UserModel.findOne({ email: normalizedEmail });
 
