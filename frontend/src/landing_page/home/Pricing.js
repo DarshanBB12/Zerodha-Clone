@@ -1,0 +1,32 @@
+import React from 'react';
+
+function Pricing() {
+    return (  
+        <div className='container'>
+            <div className='row'>
+                <div className='col-5'>
+                    <h2 className='mb-3'>Unbeatable pricing</h2>
+                    <p className='fs-5.9 '>We pioneered the concept of discount broking and price transparency in India. Flat fees and no hidden charges.</p>
+                    <div>
+                    <a href=''  style={{textDecoration:"none", marginRight:"20px"}}>See pricing <i class="fa fa-long-arrow-right" aria-hidden="true"></i></a>
+                    </div>
+                </div>
+                <div className='col-1'></div>
+                <div className='col-6  '>
+                    <div className='row text-center'>
+                    <div className='col p-2 border'>
+                        <h1 className='mb-3'>₹0</h1>
+                        <p>Free equity delivery and direct mutual funds </p>
+                    </div>
+                    <div className='col border'>
+                        <h1 className='mb-4 mt-3'>₹20</h1>
+                        <p>intraday and F&O</p>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default Pricing;
