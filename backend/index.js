@@ -15,8 +15,17 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 const uri = process.env.MONGO_URL;
+const allowedOrigins = (process.env.CORS_ORIGINS || "http://localhost:3001,http://localhost:3002,http://localhost:3003,https://zerodha-frontend.onrender.com,https://zerodha-dashboard.onrender.com")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
-app.use(cors());
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
