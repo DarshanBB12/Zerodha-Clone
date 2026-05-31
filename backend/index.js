@@ -15,14 +15,10 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 const uri = process.env.MONGO_URL;
-const allowedOrigins = (process.env.CORS_ORIGINS || "http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3000")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: "*",
     credentials: true,
   })
 );
