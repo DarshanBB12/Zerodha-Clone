@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 
 import { Link } from "react-router-dom";
+import { useDashboardAuth } from "../auth/AuthGate";
 
 const Menu = () => {
+  const { user, logout } = useDashboardAuth();
   const [selectedMenu, setSelectedMenu] = useState(0);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
@@ -10,16 +12,24 @@ const Menu = () => {
     setSelectedMenu(index);
   };
 
-  const handleProfileClick = (index) => {
+  const handleProfileClick = () => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
   };
+
+  const displayName = user?.username || user?.email || "User";
+  const initials = displayName
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   const menuClass = "menu";
   const activeMenuClass = "menu selected";
 
   return (
     <div className="menu-container">
-      <img src="logo.png" style={{ width: "50px" }} />
+      <img src="logo.png" style={{ width: "50px" }} alt="Zerodha" />
       <div className="menus">
         <ul>
           <li>
@@ -90,9 +100,17 @@ const Menu = () => {
           </li>
         </ul>
         <hr />
-        <div className="profile" onClick={handleProfileClick}>
-          <div className="avatar">ZU</div>
-          <p className="username">USERID</p>
+        <div className="profile-wrap">
+          <button className="profile" type="button" onClick={handleProfileClick}>
+            <span className="avatar">{initials}</span>
+            <span className="username">{displayName}</span>
+          </button>
+          {isProfileDropdownOpen && (
+            <div className="profile-dropdown">
+              <p>{user?.email}</p>
+              <button type="button" onClick={logout}>Logout</button>
+            </div>
+          )}
         </div>
       </div>
     </div>

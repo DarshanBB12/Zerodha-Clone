@@ -12,9 +12,9 @@ const buildCookieOptions = (rememberMe = false) => ({
   maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000,
 });
 
-const createToken = (userId) => {
+const createToken = (userId, rememberMe = false) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET || "jwt_secret_key", {
-    expiresIn: "7d",
+    expiresIn: rememberMe ? "30d" : "7d",
   });
 };
 
@@ -39,29 +39,24 @@ const signup = async (req, res) => {
     const normalizedPassword = String(password).trim();
     const normalizedUsername = String(username).trim();
 
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      return res.status(400).json({ success: false, message: "Enter a valid email address" });
+    }
+
+    if (normalizedPassword.length < 6) {
+      return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
+    }
+
     const existingUser = await UserModel.findOne({ email: normalizedEmail });
 
     if (existingUser) {
-      // Recovery flow: if the account already exists, refresh password and sign in.
-      existingUser.username = normalizedUsername || existingUser.username;
-      existingUser.password = await bcrypt.hash(normalizedPassword, 10);
-      await existingUser.save();
-
-      const token = createToken(existingUser._id);
-      res.cookie("token", token, buildCookieOptions());
-
-      return res.status(200).json({
-        success: true,
-        message: "Account already existed. Password updated and login successful",
-        user: sanitizeUser(existingUser),
-      });
+      return res.status(409).json({ success: false, message: "Email already exists. Please login instead" });
     }
 
-    const hashedPassword = await bcrypt.hash(normalizedPassword, 10);
     const user = await UserModel.create({
       username: normalizedUsername,
       email: normalizedEmail,
-      password: hashedPassword,
+      password: normalizedPassword,
     });
 
     const token = createToken(user._id);
@@ -116,7 +111,7 @@ const login = async (req, res) => {
       return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
-    const token = createToken(user._id);
+    const token = createToken(user._id, Boolean(rememberMe));
     res.cookie("token", token, buildCookieOptions(Boolean(rememberMe)));
 
     return res.status(200).json({
