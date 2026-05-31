@@ -5,4 +5,25 @@ export const api = axios.create({
   withCredentials: true,
 });
 
-export const getLoginUrl = () => process.env.REACT_APP_LOGIN_URL || 'https://zerodha-frontend.onrender.com/login';
+const inferLoginUrl = () => {
+  if (typeof window === 'undefined') {
+    return '';
+  }
+
+  const { origin, hostname } = window.location;
+
+  if (hostname.includes('dashboard')) {
+    return `${origin.replace('dashboard', 'frontend')}/login`;
+  }
+
+  return '';
+};
+
+export const getLoginUrl = () => {
+  const explicitUrl = (process.env.REACT_APP_LOGIN_URL || '').trim();
+  if (explicitUrl) {
+    return explicitUrl;
+  }
+
+  return inferLoginUrl() || '/login';
+};
