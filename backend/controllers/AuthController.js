@@ -25,6 +25,8 @@ const sanitizeUser = (user) => ({
   createdAt: user.createdAt,
 });
 
+const isBcryptHash = (value) => typeof value === "string" && /^\$2[abxy]?\$\d{2}\$/.test(value);
+
 const signup = async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -71,13 +73,28 @@ const login = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email and password are required" });
     }
 
-    const user = await UserModel.findOne({ email: email.toLowerCase() });
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const submittedPassword = String(password);
+
+    const user = await UserModel.findOne({ email: normalizedEmail });
 
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    let isMatch = false;
+
+    if (isBcryptHash(user.password)) {
+      isMatch = await bcrypt.compare(submittedPassword, user.password);
+    } else if (typeof user.password === "string") {
+      // Backward compatibility: upgrade legacy plain-text passwords on successful login.
+      isMatch = user.password === submittedPassword;
+
+      if (isMatch) {
+        user.password = submittedPassword;
+        await user.save();
+      }
+    }
 
     if (!isMatch) {
       return res.status(401).json({ success: false, message: "Invalid credentials" });
