@@ -49,7 +49,7 @@ export const getDashboardUrl = () => {
     return explicitUrl;
   }
 
-  return inferDashboardUrl() || 'https://zerodha-dashboard.onrender.com';
+  return inferDashboardUrl() || 'https://zerodha-dashboard-ozuo.onrender.com';
 };
 
 export const navigateToDashboard = () => {

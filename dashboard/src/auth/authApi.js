@@ -49,5 +49,5 @@ export const getLoginUrl = () => {
     return explicitUrl;
   }
 
-  return inferLoginUrl() || 'https://zerodha-frontend.onrender.com/login';
+  return inferLoginUrl() || 'https://zerodha-frontend-ozuo.onrender.com/login';
 };
