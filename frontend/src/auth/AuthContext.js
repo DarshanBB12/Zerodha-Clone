@@ -74,6 +74,7 @@ export const AuthProvider = ({ children }) => {
       return response.data;
     };
 
+
     const logout = async () => {
       try {
         await api.post('/auth/logout');

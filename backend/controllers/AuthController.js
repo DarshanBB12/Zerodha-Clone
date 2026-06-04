@@ -90,7 +90,7 @@ const login = async (req, res) => {
     const user = await UserModel.findOne({ email: normalizedEmail });
 
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res.status(401).json({ success: false, message: "User not found" });
     }
 
     let isMatch = false;
@@ -108,11 +108,16 @@ const login = async (req, res) => {
     }
 
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: "Invalid credentials" });
+      return res.status(401).json({ success: false, message: "Wrong password" });
     }
 
     const token = createToken(user._id, Boolean(rememberMe));
     res.cookie("token", token, buildCookieOptions(Boolean(rememberMe)));
+
+    // Helpful for local debugging; no effect on prod behavior.
+    if (process.env.NODE_ENV !== "production") {
+      console.log("Login set cookie token for user:", user.email);
+    }
 
     return res.status(200).json({
       success: true,
